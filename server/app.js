@@ -1,8 +1,8 @@
-const { application } = require("express");
 const express = require("express");
 const multer = require("multer");
 const fs = require("fs");
 const path = require("path");
+const { transcodeVideo } = require("./utils");
 
 const upload = multer({ dest: "assets/" });
 
@@ -14,7 +14,7 @@ app.get("/ping", (req, res) => {
 
 app.get("/video/:id", (req, res) => {
   const { id } = req.params;
-  const path = `assets/${id}.mp4`;
+  const path = `transcoded/${id}.mp4`;
   const stat = fs.statSync(path);
   const fileSize = stat.size;
   const range = req.headers.range;
@@ -42,9 +42,16 @@ app.get("/video/:id", (req, res) => {
   }
 });
 
-app.post("/upload", upload.single("test"), (req, res) => {
-  console.log(req);
-  res.send(req.file);
+app.post("/upload", upload.single("test"), async (req, res) => {
+  try {
+    if (!req.file) {
+      throw new Error("Missing mp4 file");
+    }
+    await transcodeVideo(req.file.originalname, req.file.path);
+    res.sendStatus(201);
+  } catch (err) {
+    res.sendStatus(500);
+  }
 });
 
 module.exports = app;
