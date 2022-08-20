@@ -6,7 +6,9 @@ const { transcodeVideo } = require("./utils");
 
 const upload = multer({ dest: "assets/" });
 
+const cors = require("cors");
 const app = express();
+app.use(cors());
 
 app.get("/ping", (req, res) => {
   res.send("Pong!");
@@ -42,7 +44,7 @@ app.get("/video/:id", (req, res) => {
   }
 });
 
-app.post("/upload", upload.single("test"), async (req, res) => {
+app.post("/upload", upload.single("file"), async (req, res) => {
   try {
     if (!req.file) {
       throw new Error("Missing mp4 file");
@@ -50,6 +52,7 @@ app.post("/upload", upload.single("test"), async (req, res) => {
     await transcodeVideo(req.file.originalname, req.file.path);
     res.sendStatus(201);
   } catch (err) {
+    console.log(err);
     res.sendStatus(500);
   }
 });
