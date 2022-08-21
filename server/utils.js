@@ -10,11 +10,12 @@ const transcodeVideo = async (filename, filepath) => {
         throw err;
       })
       .on("end", () => {
+        console.log("end");
         ffmpeg(filepath)
           .screenshots({
             timestamps: ["10%"],
-            folder: "./transcoded",
-            filename: `${filename}.mp4.png`,
+            folder: "./thumbnails",
+            filename: `${filename}.png`,
             size: "720x?",
           })
           .on("error", (err) => {
